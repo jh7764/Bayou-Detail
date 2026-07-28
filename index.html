@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bayou Detail Co. — Book a van</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root {
+    --cypress:      #16281f;   /* deep swamp green, page background */
+    --cypress-dark:  #0e1b15;  /* card shadow / footer band */
+    --water:        #2f5248;   /* mid green-teal, secondary surfaces */
+    --brass:        #c98a3e;   /* afternoon-sun accent */
+    --brass-bright: #e0a655;
+    --sand:         #eee6d3;   /* card surface */
+    --ink:          #17201b;  /* body text on sand */
+    --ink-soft:     #4c584f;
+    --ok:           #4f7a52;
+    --danger:       #a8462f;
+
+    --display: 'Barlow Condensed', sans-serif;
+    --body:    'Inter', sans-serif;
+    --mono:    'IBM Plex Mono', monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--cypress);
+    background-image:
+      radial-gradient(ellipse at 20% -10%, rgba(201,138,62,0.10), transparent 55%),
+      radial-gradient(ellipse at 100% 100%, rgba(47,82,72,0.55), transparent 60%);
+    font-family: var(--body);
+    color: var(--ink);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 56px 20px;
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 920px;
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    background: var(--sand);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 30px 70px -20px rgba(0,0,0,0.55);
+  }
+
+  @media (max-width: 760px) {
+    .wrap { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Left panel: pitch ---------- */
+  .pitch {
+    background: linear-gradient(165deg, var(--water), var(--cypress-dark));
+    color: var(--sand);
+    padding: 44px 36px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .ripples { position: absolute; inset: 0; opacity: 0.35; pointer-events: none; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--brass-bright);
+    margin: 0 0 14px;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 46px;
+    line-height: 0.96;
+    letter-spacing: -0.01em;
+    margin: 0 0 18px;
+    text-wrap: balance;
+  }
+
+  .pitch p {
+    font-size: 15px;
+    line-height: 1.55;
+    color: #d9e2da;
+    margin: 0 0 8px;
+    max-width: 34ch;
+  }
+
+  .van-svg { width: 100%; max-width: 220px; margin-top: 28px; }
+
+  .area-list {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #a9c2b0;
+    line-height: 1.8;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(238,230,211,0.15);
+  }
+  .area-list b { color: var(--sand); display: block; font-family: var(--body); font-weight: 600; font-size: 12px; margin-bottom: 6px; letter-spacing: 0.01em;}
+
+  /* ---------- Right panel: form ---------- */
+  .form-panel { padding: 44px 40px; }
+
+  .form-panel h2 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 26px;
+    margin: 0 0 4px;
+    color: var(--ink);
+  }
+  .form-panel .sub { font-size: 13.5px; color: var(--ink-soft); margin: 0 0 28px; }
+
+  label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .field { margin-bottom: 18px; position: relative; }
+
+  input, select {
+    width: 100%;
+    font-family: var(--body);
+    font-size: 15px;
+    padding: 11px 13px;
+    border-radius: 9px;
+    border: 1.5px solid #d8cfb6;
+    background: #fdfbf5;
+    color: var(--ink);
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+    appearance: none;
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234c584f' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 34px;
+  }
+  input:focus, select:focus {
+    border-color: var(--brass);
+    box-shadow: 0 0 0 3px rgba(201,138,62,0.18);
+  }
+
+  .zip-badge {
+    margin-top: 7px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    display: none;
+    align-items: center;
+    gap: 6px;
+  }
+  .zip-badge.show { display: flex; }
+  .zip-badge.ok { color: var(--ok); }
+  .zip-badge.no { color: var(--danger); }
+  .zip-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  button[type="submit"] {
+    width: 100%;
+    margin-top: 6px;
+    padding: 13px;
+    border: none;
+    border-radius: 9px;
+    background: var(--brass);
+    color: #1c1004;
+    font-family: var(--body);
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background .15s ease, transform .1s ease;
+  }
+  button[type="submit"]:hover:not(:disabled) { background: var(--brass-bright); }
+  button[type="submit"]:active:not(:disabled) { transform: scale(0.99); }
+  button[type="submit"]:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .status {
+    margin-top: 16px;
+    font-size: 13.5px;
+    padding: 12px 14px;
+    border-radius: 9px;
+    display: none;
+    line-height: 1.5;
+  }
+  .status.show { display: block; }
+  .status.ok   { background: #e4efe1; color: #2e5a30; border: 1px solid #c3dcc0; }
+  .status.err  { background: #f6e3dd; color: var(--danger); border: 1px solid #eac3b6; }
+
+  .config-warning {
+    margin-top: 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #8a5a1f;
+    background: #fbeed9;
+    border: 1px dashed #d8b371;
+    padding: 10px 12px;
+    border-radius: 8px;
+    display: none;
+  }
+  .config-warning.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="pitch">
+    <div>
+      <p class="eyebrow">Houston · van comes to you</p>
+      <h1>Your driveway<br>is our shop.</h1>
+      <p>Two vans, two techs, no waiting room. Tell us where to park and we'll handle the rest. We run from 8am to mid-afternoon, every day but Sunday.</p>
+
+      <svg class="van-svg" viewBox="0 0 220 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="30" width="140" height="38" rx="6" stroke="#e0a655" stroke-width="2.5"/>
+        <path d="M150 40h30l18 18v10h-48V40z" stroke="#e0a655" stroke-width="2.5" stroke-linejoin="round"/>
+        <circle cx="55" cy="70" r="10" stroke="#eee6d3" stroke-width="2.5"/>
+        <circle cx="168" cy="70" r="10" stroke="#eee6d3" stroke-width="2.5"/>
+        <path d="M18 46h50M18 56h35" stroke="#a9c2b0" stroke-width="2" stroke-linecap="round"/>
+        <path d="M0 82c14-5 26-5 40 0s26 5 40 0 26-5 40 0 26 5 40 0 26-5 40 0" stroke="#3d6a5a" stroke-width="2"/>
+      </svg>
+    </div>
+
+    <div class="area-list">
+      <b>Where we run</b>
+      Inner Loop · Kingwood<br>
+      Katy · Pearland / Friendswood / League City
+    </div>
+  </div>
+
+  <div class="form-panel">
+    <h2>Book your detail</h2>
+    <p class="sub">Fill this out and we'll confirm your slot by text.</p>
+
+    <form id="booking-form" novalidate>
+      <div class="field">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" placeholder="Jordan Reyes" required />
+      </div>
+
+      <div class="field">
+        <label for="vehicle">Vehicle</label>
+        <input type="text" id="vehicle" name="vehicle" placeholder="2021 Toyota Highlander, black" required />
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="zip">Zip code</label>
+          <input type="text" id="zip" name="zip" inputmode="numeric" maxlength="5" placeholder="77008" required />
+          <div class="zip-badge" id="zip-badge"><span class="dot"></span><span id="zip-badge-text"></span></div>
+        </div>
+        <div class="field">
+          <label for="service">Service</label>
+          <select id="service" name="service" required>
+            <option value="" disabled selected>Choose one</option>
+            <option>Wash &amp; Wax</option>
+            <option>Interior Deep Clean</option>
+            <option>Full Detail</option>
+            <option>Ceramic Coating</option>
+            <option>Maintenance Plan Visit</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="time_slot">Time slot</label>
+        <select id="time_slot" name="time_slot" required>
+          <option value="" disabled selected>Choose a slot</option>
+        </select>
+      </div>
+
+      <button type="submit" id="submit-btn">Confirm booking</button>
+
+      <div class="status" id="status"></div>
+      <div class="config-warning" id="config-warning">
+        SUPABASE_URL / SUPABASE_ANON_KEY are not set in index.html — running in local demo mode. Submissions are logged to the console instead of written to a database. See README.md.
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://wvtfytxiqxkuqtsaffit.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_vD03jxlJY2avdBfwibTZRg_LzmrrWI2";
+
+  const isConfigured = !SUPABASE_URL.startsWith("YOUR_") && !SUPABASE_ANON_KEY.startsWith("YOUR_");
+  const supabaseClient = isConfigured
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+
+  if (!isConfigured) {
+    document.getElementById("config-warning").classList.add("show");
+  }
+
+  const ALLOWED_ZIPS = new Set([
+    "77005","77006","77007","77008","77019","77024","77025","77027",
+    "77030","77056","77098","77401",
+    "77339",
+    "77450","77494",
+    "77546","77573","77584",
+  ]);
+
+  const zipInput = document.getElementById("zip");
+  const zipBadge = document.getElementById("zip-badge");
+  const zipBadgeText = document.getElementById("zip-badge-text");
+  const submitBtn = document.getElementById("submit-btn");
+
+  function checkZip() {
+    const val = zipInput.value.trim();
+    if (val.length < 5) {
+      zipBadge.classList.remove("show", "ok", "no");
+      return null;
+    }
+    const inArea = ALLOWED_ZIPS.has(val);
+    zipBadge.classList.add("show");
+    zipBadge.classList.toggle("ok", inArea);
+    zipBadge.classList.toggle("no", !inArea);
+    zipBadgeText.textContent = inArea
+      ? "In the bayou — we run this zip"
+      : "Outside our route — not yet in this zip";
+    return inArea;
+  }
+  zipInput.addEventListener("input", () => {
+    zipInput.value = zipInput.value.replace(/\D/g, "").slice(0, 5);
+    checkZip();
+  });
+
+  
+  const slotSelect = document.getElementById("time_slot");
+  const WINDOWS = ["Morning (8–11am)", "Midday (11am–2pm)", "Afternoon (2–4:30pm)"];
+
+  function buildSlots() {
+    const days = [];
+    let cursor = new Date();
+    cursor.setDate(cursor.getDate() + 1); // earliest booking is tomorrow
+    while (days.length < 6) {
+      if (cursor.getDay() !== 0) days.push(new Date(cursor)); // skip Sunday
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    const fmt = new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric" });
+    days.forEach((d) => {
+      WINDOWS.forEach((w) => {
+        const opt = document.createElement("option");
+        opt.value = `${fmt.format(d)} · ${w}`;
+        opt.textContent = `${fmt.format(d)} · ${w}`;
+        slotSelect.appendChild(opt);
+      });
+    });
+  }
+  buildSlots();
+
+  const form = document.getElementById("booking-form");
+  const statusEl = document.getElementById("status");
+
+  function showStatus(kind, msg) {
+    statusEl.textContent = msg;
+    statusEl.className = `status show ${kind}`;
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    statusEl.classList.remove("show");
+
+    const inArea = checkZip();
+    if (inArea === false) {
+      showStatus("err", "That zip is outside our current service area, so we can't book it yet. We run Inner Loop, Kingwood, Katy, and Pearland/Friendswood/League City.");
+      return;
+    }
+    if (inArea === null) {
+      showStatus("err", "Enter a valid 5-digit zip code.");
+      return;
+    }
+
+    const payload = {
+      name: document.getElementById("name").value.trim(),
+      vehicle: document.getElementById("vehicle").value.trim(),
+      zip: zipInput.value.trim(),
+      service: document.getElementById("service").value,
+      time_slot: slotSelect.value,
+    };
+
+    if (!payload.name || !payload.vehicle || !payload.service || !payload.time_slot) {
+      showStatus("err", "Fill out every field before confirming.");
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Booking…";
+
+    try {
+      if (!isConfigured) {
+        // Demo mode: no Supabase project wired up yet.
+        console.log("Booking payload (demo mode, not persisted):", payload);
+        await new Promise((r) => setTimeout(r, 500));
+        showStatus("ok", `Demo mode — this booking wasn't saved anywhere. Payload logged to the console: ${JSON.stringify(payload)}`);
+      } else {
+        const { error } = await supabaseClient.from("bookings").insert(payload);
+        if (error) throw error;
+        showStatus("ok", `You're booked, ${payload.name.split(" ")[0]} — ${payload.time_slot}. We'll text you a confirmation.`);
+        form.reset();
+        zipBadge.classList.remove("show");
+      }
+    } catch (err) {
+      console.error(err);
+      showStatus("err", "Something went wrong saving that booking. Try again in a moment.");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Confirm booking";
+    }
+  });
+</script>
+
+</body>
+</html>
