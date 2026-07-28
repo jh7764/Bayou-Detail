@@ -1,6 +1,3 @@
--- Bayou Detail Co. — booking table
--- Run this in the Supabase SQL editor (or via `supabase db push`) before wiring up the form.
-
 create extension if not exists pgcrypto;
 
 create table if not exists public.bookings (
@@ -12,9 +9,6 @@ create table if not exists public.bookings (
   service     text not null,
   time_slot   text not null,
 
-  -- Service-area enforcement, server-side. This list is pulled directly from
-  -- the zips that appear in Bayou's June job log (their actual service area),
-  -- not a guess. Keep this in sync with ALLOWED_ZIPS in index.html.
   constraint zip_in_service_area check (
     zip in (
       '77005','77006','77007','77008','77019','77024','77025','77027',
@@ -38,8 +32,6 @@ create table if not exists public.bookings (
 
 alter table public.bookings enable row level security;
 
--- Public booking form: anyone can create a booking, no one can read others' bookings
--- back through the anon key. Ray reads the table from the Supabase dashboard directly.
 create policy "anon can insert bookings"
   on public.bookings
   for insert
