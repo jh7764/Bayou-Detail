@@ -404,7 +404,6 @@
 
     try {
       if (!isConfigured) {
-        // Demo mode: no Supabase project wired up yet.
         console.log("Booking payload (demo mode, not persisted):", payload);
         await new Promise((r) => setTimeout(r, 500));
         showStatus("ok", `Demo mode — this booking wasn't saved anywhere. Payload logged to the console: ${JSON.stringify(payload)}`);
