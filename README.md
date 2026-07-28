@@ -1,6 +1,6 @@
-# Bayou Detail Co. — Booking Form
+# Bayou Detail Co. - Booking Form
 
-Single-page booking form. Plain HTML/CSS/JS, no build step, backed by Supabase.
+Single-page booking form. Plain HTML/CSS/JS backend by Supabase.
 
 ## What it does
 
@@ -11,7 +11,7 @@ Single-page booking form. Plain HTML/CSS/JS, no build step, backed by Supabase.
 
 ## Run it locally
 
-No build tooling needed — it's one HTML file.
+No build tooling needed - it's one HTML file.
 
 ```bash
 open index.html
@@ -34,17 +34,3 @@ As shipped, it runs in **demo mode**: submissions are validated and logged to th
    with your actual values.
 5. Reload the page. The demo-mode banner disappears and submissions now write to the `bookings` table.
 
-https://wvtfytxiqxkuqtsaffit.supabase.co/rest/v1/
-sb_publishable_vD03jxlJY2avdBfwibTZRg_LzmrrWI2
-
-## Deploy (optional)
-
-It's a static file, so any static host works — easiest is dragging the folder into [Netlify Drop](https://app.netlify.com/drop) or `vercel deploy` from this directory. No env vars needed since the Supabase anon key is meant to be public (that's what RLS is for).
-
-## Known gaps / what I'd do with another 2 hours
-
-- **No double-booking protection.** Two customers can currently grab the same tech/slot. Fix: a `slots` table with capacity per tech per window, decremented on insert, or a uniqueness constraint on `(time_slot)` if only one van should run per slot.
-- **No confirmation text/email.** The form promises "we'll text you a confirmation" but nothing sends it. Fix: a Supabase Edge Function triggered on insert, calling Twilio.
-- **Zip list is hardcoded in two places** (index.html and schema.sql). Fine for 18 zips today; if the service area grows, move it to a `service_zips` table and read both client and server checks from it.
-- **No admin view.** Ray currently has to open the Supabase table editor to see bookings. A one-page `/admin` view (list + status toggle) would be the next thing built.
-- **Phone number isn't collected**, which is odd for a business that texts confirmations — I'd add it before shipping this for real, I just didn't see it in the requested field list so left it out rather than assume.
